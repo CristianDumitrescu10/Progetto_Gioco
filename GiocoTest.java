@@ -278,10 +278,10 @@ public class GiocoTest {
     
             System.out.println("Congratulazioni hai trovato il tortellino d'oro!!!");
             System.out.println(" e mo che famo con sto tortellino?");
-            System.out.println("THE END");
+            System.out.println("----THE END----");
             System.out.println("------------------------------------------------------------------------------------------");
-            System.out.println("CREDITI");
-            System.out.println("Solo Cristian :(");
+            System.out.println("----CREDITI----");
+            System.out.println("Solo Cristian :( ");
             System.out.println("Vuoi rigiocare il gioco? si per rigiocare");
             String volontaUscita=myStr.nextLine();
             if(volontaUscita.equalsIgnoreCase("si")){
