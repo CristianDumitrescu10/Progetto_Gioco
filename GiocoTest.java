@@ -1,5 +1,6 @@
 package Progetto_Gioco;
 import java.util.Scanner;
+import java.util.Random;
 //Classe Astratta Personaggio
 abstract class Personaggio {
 
@@ -59,38 +60,33 @@ abstract class Personaggio {
     }
 
     // Metodi astratti
+    public abstract void attacca();
+
+    public abstract void difendi();
+    // Metodo per attaccare un Boss
     public void attacca(Boss boss) {
-        int dannoInflitto = attacco - boss.getDifesa();
+        int dannoInflitto = this.getAttacco() - boss.getDifesa();
         if (dannoInflitto > 0) {
             boss.setSalute(boss.getSalute() - dannoInflitto);
             System.out.println("Il personaggio attacca il boss per " + dannoInflitto + " punti di danno!");
         } else {
-            System.out.println("L'attacco del personaggio è stato bloccato!");
-        }
-    }
-
-    public void difendi(Boss boss) {
-        int dannoRiduzione = difesa;
-        int dannoSubito = boss.getAttacco() - dannoRiduzione;
-        if (dannoSubito > 0) {
-            salute -= dannoSubito;
-            System.out.println("Il personaggio subisce " + dannoSubito + " punti di danno!");
-        } else {
-            System.out.println("La difesa del personaggio ha bloccato l'attacco!");
+            System.out.println("Il tuo attacco non ha avuto effetto!");
         }
     }
 }
     //Classe Guerriero
-class Guerriero extends Personaggio {
-
-    public Guerriero(int salute, int mana, int attacco, int livello,int difesa) {
-        super(salute, mana, attacco, livello,difesa);
+class Guerriero extends Personaggio {    
+    
+    public Guerriero(int salute, int mana, int attacco, int livello, int difesa) {
+    super(salute, mana, attacco, livello, difesa);
     }
 
+    @Override
     public void attacca() {
         System.out.println("Il guerriero attacca con la sua spada!");
     }
 
+    @Override
     public void difendi() {
         System.out.println("Il guerriero alza il suo scudo per difendersi!");
     }
@@ -98,14 +94,16 @@ class Guerriero extends Personaggio {
     //Classe Mago
 class Mago extends Personaggio {
 
-    public Mago(int salute, int mana, int attacco, int livello,int difesa) {
-        super(salute, mana, attacco, livello,difesa);
+    public Mago(int salute, int mana, int attacco, int livello, int difesa) {
+        super(salute, mana, attacco, livello, difesa);
     }
 
+    @Override
     public void attacca() {
         System.out.println("Il Mago attacca con un incantesimo!");
     }
 
+    @Override
     public void difendi() {
         System.out.println("Il Mago crea uno scudo d'energia");
     }
@@ -114,13 +112,15 @@ class Mago extends Personaggio {
 class Ladro extends Personaggio {
 
     public Ladro(int salute, int mana, int attacco, int livello, int difesa) {
-        super(salute, mana, attacco, livello,difesa);
+        super(salute, mana, attacco, livello, difesa);
     }
 
+    @Override
     public void attacca() {
         System.out.println("Il Ladro attacca con il suo coltello!");
     }
 
+    @Override
     public void difendi() {
         System.out.println("Il Ladro schiva l'attacco");
     }
@@ -139,68 +139,46 @@ class Boss {
     }
 
     public void attacca(Personaggio personaggio) {
-        int dannoInflitto = attacco - personaggio.getDifesa();
+        int dannoInflitto = this.attacco - personaggio.getDifesa();
         if (dannoInflitto > 0) {
             personaggio.setSalute(personaggio.getSalute() - dannoInflitto);
             System.out.println("Il boss attacca il personaggio per " + dannoInflitto + " punti di danno!");
         } else {
-            System.out.println("L'attacco del boss è stato bloccato!");
+            System.out.println("L'attacco del boss non ha effetto!");
         }
     }
-    public void combatti(Personaggio personaggio) {
-        boolean giocatoreVivo = true;
-        boolean bossVivo = true;
 
-        while (giocatoreVivo && bossVivo) {
-            // Turno del personaggio
-            personaggio.attacca(this);
-
-            // Controllo vittoria del personaggio
-            if (this.salute <= 0) {
-                giocatoreVivo = false;
-                System.out.println("Il personaggio ha sconfitto il boss!");
-                break;
-            }
-
-            // Turno del boss
-            this.attacca(personaggio);
-
-            // Controllo vittoria del boss
-            if (personaggio.getSalute() <= 0) {
-                bossVivo = false;
-                System.out.println("Il boss ha sconfitto il personaggio!");
-                break;
-            }
-        }
-    }
+    // Metodi getter e setter per gli attributi del Boss
     public int getSalute() {
         return salute;
+    }
+
+    public void setSalute(int salute) {
+        this.salute = salute;
     }
 
     public int getAttacco() {
         return attacco;
     }
 
-    public int getDifesa() {
-        return difesa;
-    }
-
-    // Setters
-    public void setSalute(int salute) {
-        this.salute = salute;
-    }
-
     public void setAttacco(int attacco) {
         this.attacco = attacco;
     }
 
+    public int getDifesa() {
+        return difesa;
+    }
+
     public void setDifesa(int difesa) {
-        this.difesa= difesa;
+        this.difesa = difesa;
     }
 }
 
 public class GiocoTest {
-
+    public static int generaValoreCasuale(int min, int max) {
+        Random random = new Random();
+        return random.nextInt(max - min + 1) + min;
+    }
     public static void main(String[] args) {
         Scanner myStr = new Scanner(System.in);
         Scanner myInt = new Scanner(System.in);
@@ -215,84 +193,273 @@ public class GiocoTest {
             System.out.println("[2] Mago");
             System.out.println("[3] Ladro");
             int sceltapersonaggio=myInt.nextInt();
+            Personaggio personaggio = null;
             switch (sceltapersonaggio) {
                 case 1:
-                    System.out.println("Salve Sir "+nome+"!");
-                    Guerriero personaggioGuerriero= new Guerriero(100,50,20,1,40);
-                    //Fai in modo di scegliere il Guerriero
-                    
+                    int saluteCasuale = generaValoreCasuale(90, 120);
+                    int manaCasuale= generaValoreCasuale(40, 60);
+                    int attaccoCasuale = generaValoreCasuale(25, 30);
+                    int difesaCasuale= generaValoreCasuale(25, 35);
+                    System.out.println("Salve Sir " + nome + "!");
+                    personaggio = new Guerriero(saluteCasuale, manaCasuale, attaccoCasuale, 1, difesaCasuale);
                     break;
-    
                 case 2:
-                    System.out.println("Salve Mago/a "+nome+"!");
-                    Mago personaggioMago= new Mago(80,70,15,1,20);
-                    
+                    int saluteCasuale1 = generaValoreCasuale(30, 40);
+                    int manaCasuale1 = generaValoreCasuale(40, 60);
+                    int attaccoCasuale1 = generaValoreCasuale(25, 30);
+                    int difesaCasuale1 = generaValoreCasuale(25, 35);
+                    System.out.println("Salve Mago/a " + nome + "!");
+                    personaggio = new Mago(saluteCasuale1, manaCasuale1, attaccoCasuale1, 1, difesaCasuale1);
                     break;
-    
                 case 3:
+                    int saluteCasuale2 = generaValoreCasuale(35, 50);
+                    int manaCasuale2 = generaValoreCasuale(40, 60);
+                    int attaccoCasuale2 = generaValoreCasuale(25, 30);
+                    int difesaCasuale2 = generaValoreCasuale(15, 20);
                     System.out.println("Ehi Cane Maledetto, Riporta qui il mio coltello!");
-                    Ladro personaggioLadro= new Ladro(90, 60, 18,1,20);
-    
-                    //Aggiungi un coltello all ladro
-                    
+                    personaggio = new Ladro(saluteCasuale2, manaCasuale2, attaccoCasuale2, 1, difesaCasuale2);
                     break;
-            
                 default:
-                    //Fai in modo di ciclare
+                    System.out.println("Scelta non valida!");
                     break;
             }
-    
+            if (personaggio != null) {
             System.out.println("-----------------------------------------------");
-            System.out.println(" ");
-            System.out.println("*il tuo personaggio si addentra nelle foreste di Osteria Grande alla ricerca del Tortellino d'oro*");
-            System.out.println(" ");
+            System.out.println("* Il tuo personaggio si addentra nelle foreste di Osteria Grande alla ricerca del Tortellino d'oro *");
             System.out.println("-----------------------------------------------");
-            System.out.println(" ");
-            System.out.println("LIVELLO 1-Il Goblin della Dozza");
+
+            // Livello 1 - Il Goblin della Dozza
+            System.out.println("LIVELLO 1 - Il Goblin della Dozza");
             System.out.println("Mentre ti avventuri verso la Pizzeria Desiderio, scopri un Goblin che ti impedisce il passaggio");
-            //Inserisci la battaglia livello 1
-            System.out.println("Hai distrutto: Il Goblin della Dozza");
-            System.out.println("il Goblin della Dozza ti indica la direzione di Bologna come la zona ideale per trovare indizi sul tesoro! ");
-    
-    
-    
-    
-    
-    
-            System.out.println("LIVELLO 2-La Strega del Pratello");
-            System.out.println("Mentre ti avventuri nella Via del Pratello, ti imbatti in una Strega Comunista, che ha una pergamena che indica la posizione del tesoro");
-            //Inserisci la battaglia livello 2
-            System.out.println("Hai distrutto: La Strega del Pratello!!!");
-            System.out.println("La Pergamena ti indica San Luca come possibile ubbicazione del Tortellino");
-    
-    
-    
-    
-    
-            System.out.println("LIVELLO 3- Il Dragone di San Luca");
-            System.out.println("Mentre cerchi di scalare il Monte di San Luca, vicinissimo al Tortellino d'Oro ti imbatti in un terribile Dragone");
-            //Inserisci la battaglia livello 3
-            System.out.println("Hai distrutto: Il Dragone di San Luca, e la tua scalata prosegue");
-            
-            //BOSS FINALE????
-    
-            System.out.println("Congratulazioni hai trovato il tortellino d'oro!!!");
-            System.out.println(" e mo che famo con sto tortellino?");
-            System.out.println("----THE END----");
-            System.out.println("------------------------------------------------------------------------------------------");
-            System.out.println("----CREDITI----");
-            System.out.println("Solo Cristian :( ");
-            System.out.println("Vuoi rigiocare il gioco? si per rigiocare");
-            String volontaUscita=myStr.nextLine();
-            if(volontaUscita.equalsIgnoreCase("si")){
 
-            }else{
-                
+            Boss goblin = new Boss(70, 30, 10); // Esempio di un goblin come boss del livello 1
+                while (goblin.getSalute() > 0 && personaggio.getSalute() > 0) {
+                    personaggio.attacca(goblin);
+
+                    if (goblin.getSalute() <= 0) {
+                        System.out.println("Hai sconfitto il Goblin della Dozza!");
+                        break;
+                    }
+
+                    goblin.attacca(personaggio);
+
+                    if (personaggio.getSalute() <= 0) {
+                        System.out.println("Sei stato sconfitto dal Goblin della Dozza...");
+                        break;
+                    }
+            
+
+                    if (personaggio.getSalute() > 0) {
+                        System.out.println("Il Goblin della Dozza ti indica la direzione di Bologna come la zona ideale per trovare indizi sul tesoro!");
+                        System.out.println("-----------------------------------------------");
+                        personaggio.setLivello(2);
+                        //personaggio = new Guerriero(100, 50, 25, 1, 20);
+                        //personaggio = new Mago(80, 70, 20, 1, 15);
+                        //personaggio = new Ladro(90, 60, 22, 1, 18);
+                        if(sceltapersonaggio==1){
+                            personaggio.setSalute(100);
+                            System.out.println("Sei Salito di Livello cosa vuoi migliorare di 20 punti");
+                            System.out.println("[1]Salute(solo per la prossima battaglia)");
+                            System.out.println("[2]Attacco");
+                            System.out.println("[3]Difesa");
+                            int sceltaUpgrade=myInt.nextInt();
+                            if(sceltaUpgrade==1){
+                                
+                                personaggio.setSalute(personaggio.getSalute()+20);
+
+                            }else if(sceltapersonaggio==2){
+                                personaggio.setAttacco(personaggio.getAttacco()+20);
+                            }else if(sceltapersonaggio==3){
+                                personaggio.setDifesa(personaggio.getAttacco()+20);
+
+                            }else{
+
+                            }
+
+                        }else if(sceltapersonaggio==2){
+                            personaggio.setSalute(80);
+                            System.out.println("Sei Salito di Livello cosa vuoi migliorare di 20punti");
+                            System.out.println("[1]Salute(solo per la prossima battaglia)");
+                            System.out.println("[2]Attacco");
+                            System.out.println("[3]Difesa");
+                            int sceltaUpgrade=myInt.nextInt();
+                            if(sceltaUpgrade==1){
+                                
+                                personaggio.setSalute(personaggio.getSalute()+20);
+
+                            }else if(sceltapersonaggio==2){
+                                personaggio.setAttacco(personaggio.getAttacco()+20);
+
+                            }else if(sceltapersonaggio==3){
+                                personaggio.setDifesa(personaggio.getAttacco()+20);
+
+                            }else{
+                            }
+
+
+                        }else if(sceltapersonaggio==3){
+                            personaggio.setSalute(90);
+                            System.out.println("Sei Salito di Livello cosa vuoi migliorare di 20");
+                            System.out.println("[1]Salute(solo per la prossima battaglia)");
+                            System.out.println("[2]Attacco");
+                            System.out.println("[3]Difesa");
+                            int sceltaUpgrade=myInt.nextInt();
+                            if(sceltaUpgrade==1){
+                                
+                                personaggio.setSalute(personaggio.getSalute()+20);
+
+                            }else if(sceltapersonaggio==2){
+                                personaggio.setAttacco(personaggio.getAttacco()+20);
+
+                            }else if(sceltapersonaggio==3){
+                                personaggio.setDifesa(personaggio.getAttacco()+20);
+
+                            }else{
+
+                            }
+                        
+                        }
+                        System.out.println("La Salute del tuo personaggio è stata restabilità");
+
+                        // Livello 2 - La Strega del Pratello
+                        System.out.println("LIVELLO 2 - La Strega del Pratello");
+                        System.out.println("Mentre ti avventuri nella Via del Pratello, ti imbatti in una Strega Comunista, che ha una pergamena che indica la posizione del tesoro");
+
+                        Boss strega = new Boss(70, 20, 15); 
+                        while (strega.getSalute() > 0 && personaggio.getSalute() > 0) {
+        
+                            personaggio.attacca(strega);
+
+                            if (strega.getSalute() <= 0) {
+                                System.out.println("Hai sconfitto la Strega del Pratello!");
+                                break;
+                            }
+
+                            strega.attacca(personaggio);
+
+                            if (personaggio.getSalute() <= 0) {
+                                System.out.println("Sei stato sconfitto dalla Strega del Pratello...");
+                                break;
+                            }
+                        }
+
+                            if (personaggio.getSalute() > 0) {
+                                personaggio.setLivello(2);
+                                //personaggio = new Guerriero(100, 50, 25, 1, 20);
+                                //personaggio = new Mago(80, 70, 20, 1, 15);
+                                //personaggio = new Ladro(90, 60, 22, 1, 18);
+                                if(sceltapersonaggio==1){
+                                    personaggio.setSalute(100);
+                                    System.out.println("Sei Salito di Livello cosa vuoi migliorare di 20");
+                                    System.out.println("[1]Salute(solo per la prossima battaglia)");
+                                    System.out.println("[2]Attacco");
+                                    System.out.println("[3]Difesa");
+                                    int sceltaUpgrade=myInt.nextInt();
+                                    if(sceltaUpgrade==1){
+                                        
+                                        personaggio.setSalute(personaggio.getSalute()+20);
+
+                                    }else if(sceltapersonaggio==2){
+                                        personaggio.setAttacco(personaggio.getAttacco()+20);
+
+                                    }else if(sceltapersonaggio==3){
+                                        personaggio.setDifesa(personaggio.getAttacco()+20);
+
+                                    }else{
+
+                                    }
+
+                                }else if(sceltapersonaggio==2){
+                                    personaggio.setSalute(80);
+                                    System.out.println("Sei Salito di Livello cosa vuoi migliorare di 20");
+                                    System.out.println("[1]Salute(solo per la prossima battaglia)");
+                                    System.out.println("[2]Attacco");
+                                    System.out.println("[3]Difesa");
+                                    int sceltaUpgrade=myInt.nextInt();
+                                    if(sceltaUpgrade==1){
+                                        
+                                        personaggio.setSalute(personaggio.getSalute()+20);
+
+                                    }else if(sceltapersonaggio==2){
+                                        personaggio.setAttacco(personaggio.getAttacco()+20);
+
+                                    }else if(sceltapersonaggio==3){
+                                        personaggio.setDifesa(personaggio.getAttacco()+20);
+
+                                    }else{
+                                    }
+
+
+                                }else if(sceltapersonaggio==3){
+                                    personaggio.setSalute(90);
+                                    System.out.println("Sei Salito di Livello cosa vuoi migliorare di 20");
+                                    System.out.println("[1]Salute(solo per la prossima battaglia)");
+                                    System.out.println("[2]Attacco");
+                                    System.out.println("[3]Difesa");
+                                    int sceltaUpgrade=myInt.nextInt();
+                                    if(sceltaUpgrade==1){
+                                        
+                                        personaggio.setSalute(personaggio.getSalute()+20);
+
+                                    }else if(sceltapersonaggio==2){
+                                        personaggio.setAttacco(personaggio.getAttacco()+20);
+
+                                    }else if(sceltapersonaggio==3){
+                                        personaggio.setDifesa(personaggio.getAttacco()+20);
+
+                                    }else{
+
+                                    }
+                                
+                                }
+                            System.out.println("La Pergamena ti indica San Luca come possibile ubicazione del Tortellino");
+                            System.out.println("-----------------------------------------------");
+
+                            // Livello 3 - Il Dragone di San Luca
+                            System.out.println("LIVELLO 3 - Il Dragone di San Luca");
+                            System.out.println("Mentre cerchi di scalare il Monte di San Luca, vicinissimo al Tortellino d'Oro ti imbatti in un terribile Dragone");
+
+                            Boss dragone = new Boss(100, 25, 20); 
+                            while (dragone.getSalute() > 0 && personaggio.getSalute() > 0) {
+                                personaggio.attacca(dragone);
+
+                                
+                                if (dragone.getSalute() <= 0) {
+                                    System.out.println("Hai sconfitto il Dragone di San Luca!");
+                                    break;
+                                }
+
+                                dragone.attacca(personaggio);
+
+                                if (personaggio.getSalute() <= 0) {
+                                    System.out.println("Sei stato sconfitto dal Dragone di San Luca...");
+                                    break;
+                                }
+                            }
+
+                            // Se il personaggio è vivo, hai vinto il gioco
+                            if (personaggio.getSalute() > 0) {
+                            System.out.println("Congratulazioni, hai trovato il Tortellino d'Oro!!!");
+                            System.out.println("E mo, che vuoi fare con sto tortellino?");
+                            System.out.println("THE END");
+
+                            System.out.println("Vuoi Riprovare la storia? si per ricominciare");
+                            String seleziozio=myStr.nextLine();
+
+                            if (seleziozio.equalsIgnoreCase("si")){
+                                continue;
+
+                            }else{
+                                a=false;
+                            }
+                            
+                        }
+                        }
+                    }
+                }
             }
-            
         }
-
-
     }
-    
 }
+
+    
