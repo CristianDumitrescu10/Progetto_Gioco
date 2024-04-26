@@ -59,9 +59,26 @@ abstract class Personaggio {
     }
 
     // Metodi astratti
-    public abstract void attacca();
+    public void attacca(Boss boss) {
+        int dannoInflitto = attacco - boss.getDifesa();
+        if (dannoInflitto > 0) {
+            boss.setSalute(boss.getSalute() - dannoInflitto);
+            System.out.println("Il personaggio attacca il boss per " + dannoInflitto + " punti di danno!");
+        } else {
+            System.out.println("L'attacco del personaggio è stato bloccato!");
+        }
+    }
 
-    public abstract void difendi();
+    public void difendi(Boss boss) {
+        int dannoRiduzione = difesa;
+        int dannoSubito = boss.getAttacco() - dannoRiduzione;
+        if (dannoSubito > 0) {
+            salute -= dannoSubito;
+            System.out.println("Il personaggio subisce " + dannoSubito + " punti di danno!");
+        } else {
+            System.out.println("La difesa del personaggio ha bloccato l'attacco!");
+        }
+    }
 }
     //Classe Guerriero
 class Guerriero extends Personaggio {
@@ -127,12 +144,62 @@ class Boss {
             personaggio.setSalute(personaggio.getSalute() - dannoInflitto);
             System.out.println("Il boss attacca il personaggio per " + dannoInflitto + " punti di danno!");
         } else {
-            System.out.println("");
+            System.out.println("L'attacco del boss è stato bloccato!");
         }
+    }
+    public void combatti(Personaggio personaggio) {
+        boolean giocatoreVivo = true;
+        boolean bossVivo = true;
+
+        while (giocatoreVivo && bossVivo) {
+            // Turno del personaggio
+            personaggio.attacca(this);
+
+            // Controllo vittoria del personaggio
+            if (this.salute <= 0) {
+                giocatoreVivo = false;
+                System.out.println("Il personaggio ha sconfitto il boss!");
+                break;
+            }
+
+            // Turno del boss
+            this.attacca(personaggio);
+
+            // Controllo vittoria del boss
+            if (personaggio.getSalute() <= 0) {
+                bossVivo = false;
+                System.out.println("Il boss ha sconfitto il personaggio!");
+                break;
+            }
+        }
+    }
+    public int getSalute() {
+        return salute;
+    }
+
+    public int getAttacco() {
+        return attacco;
+    }
+
+    public int getDifesa() {
+        return difesa;
+    }
+
+    // Setters
+    public void setSalute(int salute) {
+        this.salute = salute;
+    }
+
+    public void setAttacco(int attacco) {
+        this.attacco = attacco;
+    }
+
+    public void setDifesa(int difesa) {
+        this.difesa= difesa;
     }
 }
 
-public class Gioco {
+public class GiocoTest {
 
     public static void main(String[] args) {
         Scanner myStr = new Scanner(System.in);
